@@ -1,11 +1,13 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
 const router = express.Router();
+const protectByToken = require("../modules/authEndpoints");
 const dbURI =
   "postgres://svweyjmwncotvj:25a12ff7cfdd88ea11943cb8438b4383ca6c9ea96fb8783a1e5968db1cd8b2e7@ec2-107-20-244-40.compute-1.amazonaws.com:5432/ddoducrh03dt9u" +
   "?ssl=true"; //get from heroku postgres settings URI
 const db = require("../modules/db")(process.env.DATABASE_URL || dbURI);
 
+router.use(protectByToken.protectEndpoints());
 // create user -------------------------------------------------------------------
 router.post("/", async function(req, res, next) {
   let data = req.body;
@@ -90,7 +92,7 @@ router.delete("/:userID", async function(req, res, next) {
 router.get("/email/:userEmail", async function(req, res, next) {
   try {
     let email = await db.checkIfEmailExists(req.params.userEmail);
-    if (email===true||email===false) {
+    if (email === true || email === false) {
       res.status(200).json(email);
     } else {
       throw "User does not exist.";
@@ -104,7 +106,7 @@ router.get("/email/:userEmail", async function(req, res, next) {
 router.get("/emailAndData/:userEmail", async function(req, res, next) {
   try {
     let email = await db.checkEmailReturnUser(req.params.userEmail);
-    if (email||email===false) {
+    if (email || email === false) {
       res.status(200).json(email);
     } else {
       throw "User does not exist.";
